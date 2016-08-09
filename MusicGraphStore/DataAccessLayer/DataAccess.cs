@@ -43,11 +43,13 @@ namespace MusicGraphStore.DataAccessLayer
         #region Public Read Methods
 
         /// <summary>
-        /// Get an Artist corresponding to the spotifyId provided
+        /// Get an Artist metadata corresponding to the spotifyId provided, and its Genres
+        /// Does not return related artists
         /// </summary>
         /// <param name="spotifyId"></param>
         /// <exception cref="">Found more than one corresponding artist</exception>
         /// <returns></returns>
+        ////TODO: Add relevance within genre
         public Artist GetArtistForSpotifyId(string spotifyId)
         {
             Artist artist = new Artist();
@@ -73,6 +75,57 @@ namespace MusicGraphStore.DataAccessLayer
                         artist.Name = record["Name"].As<string>();
                         artist.Popularity = record["Popularity"].As<int>();
                         artist.Url = record["Url"].As<string>();
+                    }
+
+                    //get genres for the artist
+                    var result2 = session.Run(
+                            "MATCH (a:Artist {SpotifyId:{SpotifyId}})-[:IN_GENRE]->(g:Genre)  "
+                          + "RETURN distinct g.Name AS Name ",
+                            new Dictionary<string, object> { { "SpotifyId", spotifyId } });
+
+                    foreach (var record in result2)
+                    {
+                        artist.Genres.Add(new Genre() {Name= record["Name"].As<string>() });
+                    }
+                }
+                catch (Exception e) { throw e; }
+            }
+
+            return artist;
+        }
+
+        /// <summary>
+        /// Get an artist and related artists for the provided spotifyId
+        /// Does not return genres
+        /// </summary>
+        /// <param name="spotifyId"></param>
+        /// <returns></returns>
+        public Artist GetRelatedArtistsForSpotifyId(string spotifyId)
+        {
+            Artist artist = new Artist();
+            
+            using (var session = driver.Session())
+            {
+                try
+                {
+                    artist = this.GetArtistForSpotifyId(spotifyId);
+
+                    //get related artists for the artist
+                    var result2 = session.Run(
+                            "MATCH (a:Artist {SpotifyId:{SpotifyId}})-[r:RELATED]->(b:Artist)  "
+                          + "return distinct b.Name as Name, b.SpotifyId as SpotifyId, b.Popularity as Popularity, r.Relevance as Relevance Order by Relevance DESC ",
+                            new Dictionary<string, object> { { "SpotifyId", spotifyId } });
+
+                    foreach (var record in result2)
+                    {
+                        Artist item = new Artist()
+                        {
+                            Name = record["Name"].As<string>(),
+                            SpotifyId = record["SpotifyId"].As<string>(),
+                            Popularity = record["Popularity"].As<int>()
+                        };
+                        if (null != record["Relevance"]) { item.Relevance = float.Parse(record["Relevance"].As<string>()); }
+                        artist.RelatedArtists.Add(item);
                     }
                 }
                 catch (Exception e) { throw e; }

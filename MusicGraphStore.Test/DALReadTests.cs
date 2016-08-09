@@ -12,6 +12,37 @@ namespace MusicGraphStore.Test
 
         #region Read methods Tests
         [TestMethod]
+        public void GAFSID_ResponseContainsNameAndGenres()
+        {
+            try
+            {
+                DataAccess dal = DataAccess.Instance;
+                Artist response = dal.GetArtistForSpotifyId("4KWTAlx2RvbpseOGMEmROg"); //R.E.M.
+                Assert.IsTrue((response.Genres.Count > 0) && (null != response.Name));
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [TestMethod]
+        public void GRAFSID_ResponseContainsNameAndRelatedArtists()
+        {
+            try
+            {
+                DataAccess dal = DataAccess.Instance;
+                Artist response = dal.GetRelatedArtistsForSpotifyId("22WZ7M8sxp5THdruNY3gXt"); //The Doors
+                Assert.IsTrue((response.RelatedArtists.Count > 0) && (null != response.Name));
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+
+        [TestMethod]
         public void GAAFG_WithNullInput_ResponseNotEmpty()
         {
             try
