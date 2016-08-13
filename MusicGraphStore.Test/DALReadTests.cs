@@ -113,6 +113,42 @@ namespace MusicGraphStore.Test
                 Assert.Fail(e.Message);
             }
         }
+
+        [TestMethod]
+        public void GPBA_ResponseContainsArtistPathsAndArtistRelevance()
+        {
+            try
+            {
+                DataAccess dal = DataAccess.Instance;
+                List<List<Artist>> response = dal.GetPathsBetweenArtists("4KWTAlx2RvbpseOGMEmROg", "22WZ7M8sxp5THdruNY3gXt", 5);
+                Assert.IsTrue(
+                    (response.Count > 0)
+                    &&
+                    (null != response[0].Find( x => (x.Relevance > 0)))
+                    );
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+        #endregion
+
+        #region Search methods Tests
+        [TestMethod]
+        public void SABN_ResponseContainsArtists()
+        {
+            try
+            {
+                DataAccess dal = DataAccess.Instance;
+                List<Artist> response = dal.SearchArtistByName("nine");
+                Assert.IsTrue((response.Count > 0) && (null != response[0].Name));
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
         #endregion
 
         #region Compute methods Tests

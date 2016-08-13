@@ -42,13 +42,15 @@ namespace MusicGraphStore.Test
             Artist a1 = new Artist
             {
                 SpotifyId = "0X380XXQSNBYuleKzav5UO",
-                Name = "Nine Inch Nails"
+                Name = "Nine Inch Nails",
+                Popularity=65
             };
 
             Artist a2 = new Artist
             {
                 SpotifyId = "4uYwLU7k03RCQSRXGtQGg0",
                 Name = "Orgy",
+                Popularity = 45,
                 Relevance = float.Parse("41")
             };
 

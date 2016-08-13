@@ -176,6 +176,7 @@ namespace MusicGraphStore.DataAccessLayer
         /// </summary>
         /// <param name="genres">List of genre names to retrieve artists from</param>
         /// <returns>List of new genres with ordered artists for each genre</returns>
+        ////TODO: add Artist relevance within a Genre
         public List<Genre> GetAllArtistsForGenres(List<Genre> genres)
         {
             List<Genre> response = new List<Genre>();
@@ -276,7 +277,7 @@ namespace MusicGraphStore.DataAccessLayer
         /// <summary>
         /// Get All Genres in the music graph store
         /// </summary>
-        /// <returns></returns>
+        /// <returns>list of Genres</returns>
         public List<Genre> GetAllGenres()
         {
             List<Genre> response = new List<Genre>();
@@ -294,6 +295,106 @@ namespace MusicGraphStore.DataAccessLayer
                     {
                         Genre genre = new Genre { Name = record["Name"].As<string>() };
                         response.Add(genre);
+                    }
+                }
+                catch (Exception e) { throw e; }
+            }
+
+            return response;
+        }
+
+        /// <summary>
+        /// Computes the most relevant artist paths to go from one artist to another artist. The paths do not account for directionality of relationship between artists
+        /// </summary>
+        /// <param name="fromSpotifyId">starting artist spotifyId</param>
+        /// <param name="toSpotifyId">destination artist spotifyId</param>
+        /// <param name="pageSize">number of paths to return</param>
+        /// <returns>a list of paths. Each path is a list of artist. The relevance of artists within each path is the relevance of the relationship with the previous artist in the list</returns>
+        public List<List<Artist>> GetPathsBetweenArtists(string fromSpotifyId, string toSpotifyId, int pageSize)
+        {
+            List<List<Artist>> response = new List<List<Artist>>();
+
+            using (var session = driver.Session())
+            {
+                try
+                {
+                    //solve Dijsktra: get all paths, then sort by "distance", that is by relevance of relationship between artists in the path
+                    var result = session.Run(
+                            "MATCH (from: Artist {SpotifyId: {spotifyId1 }}), (to: Artist {SpotifyId: {spotifyId2 }}) , " 
+                          + "paths = allShortestPaths((from) -[:RELATED *]-(to)) "
+                          + "WITH REDUCE(dist = 0, rel in [x in rels(paths) where x.Relevance IS NOT NULL] | dist + rel.Relevance) AS distance, paths "
+                          + "RETURN paths, distance "
+                          + "ORDER BY distance DESC "
+                          + "LIMIT {pageSize} ",
+                          new Dictionary<string, object> { { "spotifyId1", fromSpotifyId }, { "spotifyId2", toSpotifyId }, { "pageSize", pageSize } });
+
+                    foreach (var record in result)
+                    {
+                        List<Artist> artistPath = new List<Artist>();
+                        IPath path = record["paths"].As<IPath>();
+                        int k = 0;
+                        foreach (var node in path.Nodes)
+                        {
+                            Artist artist = new Artist()
+                            {
+                                SpotifyId = node["SpotifyId"].As<string>(),
+                                Name = node["Name"].As<string>(),
+                                Popularity = node["Popularity"].As<int>()
+                            };
+
+                            //not starting node --- provide the relevance of the relationship to the previous Artist
+                            if (k>0)
+                            {
+                                artist.Relevance = float.Parse(path.Relationships[k-1]["Relevance"].As<string>());
+                            }
+
+                            artistPath.Add(artist);
+                            k++;
+                        }
+
+                        response.Add(artistPath);
+
+                    }
+                }
+                catch (Exception e) { throw e; }
+            }
+
+            return response;
+        }
+        #endregion
+
+        #region Public Search Methods
+
+        /// <summary>
+        /// Search all artists whose name contains the provided string. Search is case insensitive.
+        /// </summary>
+        /// <param name="name">name to search for</param>
+        /// <returns>list of matching artists</returns>
+        ////TODO: modify query and neo4j configuration to do fuzzy matching of the string. This can be done using manual indexes and node_auto_index, or perhaps with solr.
+        public List<Artist> SearchArtistByName(string name)
+        {
+            List<Artist> response = new List<Artist>();
+
+            using (var session = driver.Session())
+            {
+                try
+                {
+                    string query = "MATCH (a:Artist) "
+                          + "WHERE a.Name =~ \"(?i).*" + name + ".*\" "
+                          + "RETURN a.Name as Name, a.Popularity as Popularity, a.SpotifyId as SpotifyId "
+                          + "ORDER BY Popularity DESC";
+
+                    //get matchin artists
+                    var result = session.Run(query);
+
+                    foreach (var record in result)
+                    {
+                        response.Add(new Artist()
+                        {
+                            Name = record["Name"].As<string>(),
+                            SpotifyId = record["SpotifyId"].As<string>(),
+                            Popularity = record["Popularity"].As<int>()
+                        });
                     }
                 }
                 catch (Exception e) { throw e; }
