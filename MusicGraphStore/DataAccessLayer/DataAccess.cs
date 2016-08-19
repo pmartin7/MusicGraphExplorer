@@ -14,11 +14,7 @@ namespace MusicGraphStore.DataAccessLayer
     /// </summary>
     public sealed class DataAccess
     {
-        #region Connection Info
-        //connection
-        private const string usr = "neo4j";
-        private const string pwd = "Gr@phexplore1";
-        private const string srv = "bolt://localhost";
+        #region Properties
         IDriver driver;
         #endregion
 
@@ -35,7 +31,9 @@ namespace MusicGraphStore.DataAccessLayer
         //private constructor
         private DataAccess()
         {
-            driver = GraphDatabase.Driver(srv, AuthTokens.Basic(usr, pwd));
+            driver = GraphDatabase.Driver(
+                Properties.Settings.Default.neo4jSrv, 
+                AuthTokens.Basic(Properties.Settings.Default.neo4jUsr, Properties.Settings.Default.neo4jPwd));
         }
 
         #endregion
