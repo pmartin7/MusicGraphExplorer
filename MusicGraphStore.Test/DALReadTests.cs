@@ -71,6 +71,36 @@ namespace MusicGraphStore.Test
             }
         }
 
+        [TestMethod]
+        public void GRGFG_ResponseContainsGenreAndRelatedGenre()
+        {
+            try
+            {
+                DataAccess dal = DataAccess.Instance;
+                Genre response = dal.GetRelatedGenresForGenre("industrial"); 
+                Assert.IsTrue((response.RelatedGenres.Count > 0) && (null != response.Name));
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [TestMethod]
+        public void GRGFG_RelatedGenreRelevanceNotNull()
+        {
+            try
+            {
+                DataAccess dal = DataAccess.Instance;
+                Genre response = dal.GetRelatedGenresForGenre("new wave"); //The Doors
+                Assert.IsTrue(null != response.RelatedGenres.Find(x => (x.Relevance > 0)));
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
 
         [TestMethod]
         public void GAAFG_WithNullInput_ResponseNotEmpty()

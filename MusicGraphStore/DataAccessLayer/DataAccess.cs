@@ -126,6 +126,38 @@ namespace MusicGraphStore.DataAccessLayer
             return artist;
         }
 
+        /// <summary>
+        /// Get related genres for a passed in genre name
+        /// </summary>
+        /// <param name="spotifyId"></param>
+        /// <returns></returns>
+        public Genre GetRelatedGenresForGenre(string genre)
+        {
+            Genre response = new Genre() { Name = genre };
+
+            using (var session = driver.Session())
+            {
+                try
+                {
+                    //get related genres for the genre
+                    var result2 = session.Run(
+                            "MATCH (a:Genre {Name:{Name}})-[r:RELATED_TO_GENRE]->(g:Genre) "
+                          + "RETURN DISTINCT g, r.Score as Relevance "
+                          + "ORDER BY Relevance DESC ",
+                            new Dictionary<string, object> { { "Name", genre } });
+
+                    foreach (var record in result2)
+                    {
+                        Genre item = Helpers.DeserializeNode(record["g"].As<INode>(), new Genre());
+                        item = Helpers.DeserializeRecord(record, item); //add in the relevance score
+                        response.RelatedGenres.Add(item);
+                    }
+                }
+                catch (Exception e) { throw e; }
+            }
+
+            return response;
+        }
 
         /// <summary>
         /// Return all artists in the graph
