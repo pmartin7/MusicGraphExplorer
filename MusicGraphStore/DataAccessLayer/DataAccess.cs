@@ -58,30 +58,30 @@ namespace MusicGraphStore.DataAccessLayer
                 {
                     //verify if artist exists
                     var result = session.Run(
-                            "MATCH (a:Artist) WHERE a.SpotifyId={SpotifyId} "
-                          + "RETURN a.SpotifyId AS SpotifyId, a.Name AS Name, a.Popularity AS Popularity, a.Url AS Url",
+                            "MATCH (a:Artist {SpotifyId: {SpotifyId}})-[:IN_GENRE]->(g:Genre)"
+                          + "RETURN a, g",
                             new Dictionary<string, object> { { "SpotifyId", spotifyId } });
 
-                    int count = 0;
                     foreach (var record in result)
                     {
+                        //first record --- populate the artist
+                        if (null == artist.SpotifyId)
+                        {
+                            artist = Helpers.DeserializeNode(record["a"].As<INode>(), artist);
+                        }
+
                         //if more than one artist is found, throw an exception
-                        if (count > 0) throw new ArgumentOutOfRangeException("spotifyId", result, "Found multiple artist records for the provided SpotifyId");
+                        if (record["a"].As<INode>().Properties["SpotifyId"].As<string>() != artist.SpotifyId)
+                        {
+                            throw new ArgumentOutOfRangeException("spotifyId", result, "Found multiple artist records for the provided SpotifyId");
+                        }
 
-                        count++;
-                        artist = Helpers.deserializeRecord(record, artist);
-                    }
-
-                    //get genres for the artist
-                    var result2 = session.Run(
-                            "MATCH (a:Artist {SpotifyId:{SpotifyId}})-[:IN_GENRE]->(g:Genre)  "
-                          + "RETURN distinct g.Name AS Name ",
-                            new Dictionary<string, object> { { "SpotifyId", spotifyId } });
-
-                    foreach (var record in result2)
-                    {
-                        artist.Genres.Add(Helpers.deserializeRecord(record, new Genre()));
-                        artist.TotalGenres++;
+                        //then populate genres
+                        if (null != record["g"].As<INode>().Properties["Name"].As<string>())
+                        {
+                            artist.Genres.Add(Helpers.DeserializeNode(record["g"].As<INode>(), new Genre()));
+                            artist.TotalGenres++;
+                        }
                     }
                 }
                 catch (Exception e) { throw e; }
@@ -109,12 +109,14 @@ namespace MusicGraphStore.DataAccessLayer
                     //get related artists for the artist
                     var result2 = session.Run(
                             "MATCH (a:Artist {SpotifyId:{SpotifyId}})-[r:RELATED]->(b:Artist)  "
-                          + "return distinct b.Name as Name, b.SpotifyId as SpotifyId, b.Popularity as Popularity, r.Relevance as Relevance Order by Relevance DESC ",
+                          + "RETURN DISTINCT b, r.Relevance as Relevance "
+                          + "ORDER BY Relevance DESC ",
                             new Dictionary<string, object> { { "SpotifyId", spotifyId } });
 
                     foreach (var record in result2)
                     {
-                        Artist item = Helpers.deserializeRecord(record, new Artist());
+                        Artist item = Helpers.DeserializeNode(record["b"].As<INode>(), new Artist());
+                        item = Helpers.DeserializeRecord(record, item);
                         artist.RelatedArtists.Add(item);
                     }
                 }
@@ -140,11 +142,11 @@ namespace MusicGraphStore.DataAccessLayer
                     //Get All Genres
                     var result = session.Run(
                             "MATCH (a:Artist)"
-                          + "RETURN DISTINCT a.SpotifyId AS SpotifyId, a.Name AS Name, a.Popularity AS Popularity");
+                          + "RETURN DISTINCT a");
 
                     foreach (var record in result)
                     {
-                        response.Add(Helpers.deserializeRecord(record, new Artist()));
+                        response.Add(Helpers.DeserializeNode(record["a"].As<INode>(), new Artist()));
                     }
                 }
                 catch (Exception e) { throw e; }
@@ -190,8 +192,8 @@ namespace MusicGraphStore.DataAccessLayer
                             if (null == item)
                             {
                                 //genre is not already in the response, create the item and add to response
-                                item = Helpers.deserializeRecord(record["g"].As<INode>(), new Genre());
-                                item.Artists.Add(Helpers.deserializeRecord(record["a"].As<INode>(), new Artist()));
+                                item = Helpers.DeserializeNode(record["g"].As<INode>(), new Genre());
+                                item.Artists.Add(Helpers.DeserializeNode(record["a"].As<INode>(), new Artist()));
                                 response.Add(item);
 
                             }
@@ -199,7 +201,7 @@ namespace MusicGraphStore.DataAccessLayer
                             else
                             {
                                 //the response already contains an item for the genre of the current artist record, add the artist to this item
-                                item.Artists.Add(Helpers.deserializeRecord(record["a"].As<INode>(), new Artist()));
+                                item.Artists.Add(Helpers.DeserializeNode(record["a"].As<INode>(), new Artist()));
                             }
                         }
                     }
@@ -229,7 +231,7 @@ namespace MusicGraphStore.DataAccessLayer
 
                         foreach (var record in result)
                         {
-                            item.Artists.Add(Helpers.deserializeRecord(record["a"].As<INode>(), new Artist()));
+                            item.Artists.Add(Helpers.DeserializeNode(record["a"].As<INode>(), new Artist()));
                         }
                         response.Add(item);
                     }

@@ -19,7 +19,7 @@ namespace MusicGraphStore.DataAccessLayer
         /// <param name="record"></param>
         /// <param name="a"></param>
         /// <returns></returns>
-        internal static Artist deserializeRecord(IRecord record, Artist a)
+        internal static Artist DeserializeRecord(IRecord record, Artist a)
         {
             if (null == record) { return a; }
 
@@ -42,7 +42,7 @@ namespace MusicGraphStore.DataAccessLayer
         /// <param name="record"></param>
         /// <param name="a"></param>
         /// <returns></returns>
-        internal static Artist deserializeRecord(INode record, Artist a)
+        internal static Artist DeserializeNode(INode record, Artist a)
         {
             if (null == record) { return a; }
 
@@ -65,7 +65,7 @@ namespace MusicGraphStore.DataAccessLayer
         /// <param name="record"></param>
         /// <param name="g"></param>
         /// <returns></returns>
-        internal static Genre deserializeRecord(IRecord record, Genre g)
+        internal static Genre DeserializeRecord(IRecord record, Genre g)
         {
             if (null == record) { return g; }
 
@@ -80,7 +80,7 @@ namespace MusicGraphStore.DataAccessLayer
         /// <param name="record"></param>
         /// <param name="g"></param>
         /// <returns></returns>
-        internal static Genre deserializeRecord(INode record, Genre g)
+        internal static Genre DeserializeNode(INode record, Genre g)
         {
             if (null == record) { return g; }
 
