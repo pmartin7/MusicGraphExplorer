@@ -13,7 +13,12 @@ namespace MusicGraphStore.DataAccessLayer
     /// </summary>
     internal static class Helpers
     {
-
+        /// <summary>
+        /// Deserialize an IRecord into an Artist
+        /// </summary>
+        /// <param name="record"></param>
+        /// <param name="a"></param>
+        /// <returns></returns>
         internal static Artist deserializeRecord(IRecord record, Artist a)
         {
             if (null == record) { return a; }
@@ -31,6 +36,12 @@ namespace MusicGraphStore.DataAccessLayer
             return a;
         }
 
+        /// <summary>
+        /// Deserialize an Irecord into a Genre
+        /// </summary>
+        /// <param name="record"></param>
+        /// <param name="g"></param>
+        /// <returns></returns>
         internal static Genre deserializeRecord(IRecord record, Genre g)
         {
             if (null == record) { return g; }

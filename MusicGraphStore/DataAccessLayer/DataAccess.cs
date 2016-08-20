@@ -144,13 +144,7 @@ namespace MusicGraphStore.DataAccessLayer
 
                     foreach (var record in result)
                     {
-                        Artist artist = new Artist
-                        {
-                            Name = record["Name"].As<string>(),
-                            SpotifyId = record["SpotifyId"].As<string>(),
-                            Popularity = record["Popularity"].As<int>()
-                        };
-                        response.Add(artist);
+                        response.Add(Helpers.deserializeRecord(record, new Artist()));
                     }
                 }
                 catch (Exception e) { throw e; }
