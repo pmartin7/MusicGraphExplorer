@@ -27,6 +27,21 @@ namespace MusicGraphStore.Test
         }
 
         [TestMethod]
+        public void GAFSID_SpotifyIdMatches()
+        {
+            try
+            {
+                DataAccess dal = DataAccess.Instance;
+                Artist response = dal.GetArtistForSpotifyId("4KWTAlx2RvbpseOGMEmROg"); //R.E.M.
+                Assert.IsTrue(response.SpotifyId == "4KWTAlx2RvbpseOGMEmROg");
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [TestMethod]
         public void GRAFSID_ResponseContainsNameAndRelatedArtists()
         {
             try

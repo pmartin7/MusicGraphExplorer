@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataAccessLayer\DataAccess.cs" />
+    <Compile Include="DataAccessLayer\Helpers.cs" />
     <Compile Include="GraphDataModel\Artist.cs" />
     <Compile Include="GraphDataModel\Genre.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -59,7 +59,7 @@ namespace MusicGraphStore.DataAccessLayer
                     //verify if artist exists
                     var result = session.Run(
                             "MATCH (a:Artist) WHERE a.SpotifyId={SpotifyId} "
-                          + "RETURN a.Name AS Name, a.Popularity AS Popularity, a.Url AS Url",
+                          + "RETURN a.SpotifyId AS SpotifyId, a.Name AS Name, a.Popularity AS Popularity, a.Url AS Url",
                             new Dictionary<string, object> { { "SpotifyId", spotifyId } });
 
                     int count = 0;
@@ -69,10 +69,7 @@ namespace MusicGraphStore.DataAccessLayer
                         if (count > 0) throw new ArgumentOutOfRangeException("spotifyId", result, "Found multiple artist records for the provided SpotifyId");
 
                         count++;
-                        artist.SpotifyId = spotifyId;
-                        artist.Name = record["Name"].As<string>();
-                        artist.Popularity = record["Popularity"].As<int>();
-                        artist.Url = record["Url"].As<string>();
+                        artist = Helpers.deserializeRecord(record, artist);
                     }
 
                     //get genres for the artist
@@ -83,7 +80,9 @@ namespace MusicGraphStore.DataAccessLayer
 
                     foreach (var record in result2)
                     {
-                        artist.Genres.Add(new Genre() {Name= record["Name"].As<string>() });
+                        Genre g = new Genre();
+                        artist.Genres.Add(Helpers.deserializeRecord(record, g));
+                        artist.TotalGenres++;
                     }
                 }
                 catch (Exception e) { throw e; }
