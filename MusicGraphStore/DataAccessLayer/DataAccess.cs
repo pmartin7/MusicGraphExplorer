@@ -176,8 +176,8 @@ namespace MusicGraphStore.DataAccessLayer
                         //query graph db
                         var result = session.Run(
                                 "MATCH (a:Artist)-->(g:Genre) "
-                              + "RETURN g.Name as genre, a.SpotifyId as spotifyId, a.Name as artist, a.Popularity as popularity "
-                              + "ORDER BY popularity DESC");
+                              + "RETURN g, a "
+                              + "ORDER BY a.Popularity DESC");
 
                         //process records
                         //we have a record per each (artist, genre) tuple
@@ -185,19 +185,13 @@ namespace MusicGraphStore.DataAccessLayer
                         {
                             //verify if response already contains genre
                             Genre item = response.Find
-                                (x => (x.Name == record["genre"].As<string>()));
+                                (x => (x.Name == record["g"].As<INode>().Properties["Name"].As<string>()));
 
                             if (null == item)
                             {
                                 //genre is not already in the response, create the item and add to response
-                                item = new Genre() { Name = record["genre"].As<string>() };
-                                Artist a = new Artist()
-                                {
-                                    SpotifyId = record["spotifyId"].As<string>(),
-                                    Name = record["artist"].As<string>(),
-                                    Popularity = record["popularity"].As<int>()
-                                };
-                                item.Artists.Add(a);
+                                item = Helpers.deserializeRecord(record["g"].As<INode>(), new Genre());
+                                item.Artists.Add(Helpers.deserializeRecord(record["a"].As<INode>(), new Artist()));
                                 response.Add(item);
 
                             }
@@ -205,13 +199,7 @@ namespace MusicGraphStore.DataAccessLayer
                             else
                             {
                                 //the response already contains an item for the genre of the current artist record, add the artist to this item
-                                Artist a = new Artist()
-                                {
-                                    SpotifyId = record["spotifyId"].As<string>(),
-                                    Name = record["artist"].As<string>(),
-                                    Popularity = record["popularity"].As<int>()
-                                };
-                                item.Artists.Add(a);
+                                item.Artists.Add(Helpers.deserializeRecord(record["a"].As<INode>(), new Artist()));
                             }
                         }
                     }
@@ -231,8 +219,8 @@ namespace MusicGraphStore.DataAccessLayer
                         //query graph db
                         var result = session.Run(
                                 "MATCH (a:Artist)-->(g:Genre {Name: {genre}}) "
-                              + "RETURN g.Name as genre, a.SpotifyId as spotifyId, a.Name as artist, a.Popularity as popularity "
-                              + "ORDER BY popularity DESC",
+                              + "RETURN DISTINCT a "
+                              + "ORDER BY a.Popularity DESC",
                                 new Dictionary<string, object> { { "genre", genre.Name } });
 
                         //process records
@@ -241,13 +229,7 @@ namespace MusicGraphStore.DataAccessLayer
 
                         foreach (var record in result)
                         {
-                            Artist a = new Artist()
-                            {
-                                SpotifyId = record["spotifyId"].As<string>(),
-                                Name = record["artist"].As<string>(),
-                                Popularity = record["popularity"].As<int>()
-                            };
-                            item.Artists.Add(a);
+                            item.Artists.Add(Helpers.deserializeRecord(record["a"].As<INode>(), new Artist()));
                         }
                         response.Add(item);
                     }
