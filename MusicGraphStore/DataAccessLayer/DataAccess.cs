@@ -653,22 +653,14 @@ namespace MusicGraphStore.DataAccessLayer
                           + "WITH rows + collect({artistId: b.SpotifyId, artistName: b.Name, artistPopularity: b.Popularity, score: cnt}) AS allrows, TotalRel AS TotalRel "
 
                           + "UNWIND allrows as row "
-                          + "WITH row.artistId AS artistId, row.artistName AS artistName, row.artistPopularity AS Popularity, row.score AS score, TotalRel AS TotalRel "
-                          + "RETURN DISTINCT artistId, artistName, Popularity, avg(score) / TotalRel as score ORDER BY score desc ",
+                          + "WITH row.artistId AS SpotifyId, row.artistName AS Name, row.artistPopularity AS Popularity, row.score AS score, TotalRel AS TotalRel "
+                          + "RETURN DISTINCT SpotifyId , Name, Popularity, avg(score) / TotalRel as Relevance ORDER BY Relevance desc ",
                             new Dictionary<string, object> { { "SpotifyId", artist.SpotifyId } });
 
                     //process results
                     foreach (var record in result)
                     {
-                        Artist a = new Artist()
-                        {
-                            Name = record["artistName"].As<string>(),
-                            SpotifyId = record["artistId"].As<string>(),
-                            Popularity = record["Popularity"].As<int>(),
-                            Relevance = record["score"].As<float>()
-                        };
-                        
-                        response.RelatedArtists.Add(a);
+                        response.RelatedArtists.Add(Helpers.DeserializeRecord(record, new Artist()));
                     }
                 }
                 catch (Exception e) { throw e; }
@@ -711,24 +703,18 @@ namespace MusicGraphStore.DataAccessLayer
                 {
                           var result = session.Run(
                               " MATCH(a: Artist { SpotifyId: {SpotifyId}})-[:IN_GENRE]->(g: Genre) "
-                            + " WITH count(distinct g) as totalGenres "
+                            + " WITH count(distinct g) as TotalGenres "
                             + " MATCH(b: Artist) -[:IN_GENRE]->(g: Genre) < -[:IN_GENRE] - (a:Artist { SpotifyId: {SpotifyId}}) "
-                            + " RETURN b.Name as Name, b.SpotifyId as Id, b.Popularity AS Popularity, count(distinct g) as commonGenres, totalGenres ORDER BY commonGenres ",
+                            + " RETURN b, count(distinct g) as CommonGenres, TotalGenres ORDER BY CommonGenres ",
                             new Dictionary<string, object> { { "SpotifyId", artist.SpotifyId } });
 
                     //process results
                     foreach (var record in result)
                     {
-                        Artist a = new Artist()
-                        {
-                            Name = record["Name"].As<string>(),
-                            SpotifyId = record["Id"].As<string>(),
-                            Popularity = record["Popularity"].As<int>(),
-                            CommonGenres = record["commonGenres"].As<int>()
-                        };
-
+                        Artist a = Helpers.DeserializeNode(record["b"].As<INode>(), new Artist());
+                        a = Helpers.DeserializeRecord(record, a); //this will add commongenres
                         response.RelatedArtists.Add(a);
-                        response.TotalGenres = record["totalGenres"].As<int>();
+                        response.TotalGenres = record["TotalGenres"].As<int>();
                     }
                 }
                 catch (Exception e) { throw e; }

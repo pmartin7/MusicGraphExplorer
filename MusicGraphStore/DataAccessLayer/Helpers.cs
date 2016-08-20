@@ -33,6 +33,8 @@ namespace MusicGraphStore.DataAccessLayer
 
             if (record.Keys.Contains<string>("Relevance")) { a.Relevance = float.Parse(record["Relevance"].As<string>()); }
 
+            if (record.Keys.Contains<string>("CommonGenres")) { a.CommonGenres = record["CommonGenres"].As<int>(); }
+
             return a;
         }
 
@@ -55,6 +57,8 @@ namespace MusicGraphStore.DataAccessLayer
             if (record.Properties.ContainsKey("Url")) { a.Url = record.Properties["Url"].As<string>(); }
 
             if (record.Properties.ContainsKey("Relevance")) { a.Relevance = float.Parse(record.Properties["Relevance"].As<string>()); }
+
+            if (record.Properties.ContainsKey("CommonGenres")) { a.CommonGenres = record.Properties["CommonGenres"].As<int>(); }
 
             return a;
         }
