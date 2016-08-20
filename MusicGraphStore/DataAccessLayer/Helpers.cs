@@ -71,6 +71,8 @@ namespace MusicGraphStore.DataAccessLayer
 
             if (record.Keys.Contains<string>("Name")) { g.Name = record["Name"].As<string>(); }
 
+            if (record.Keys.Contains<string>("Relevance")) { g.Relevance = float.Parse(record["Relevance"].As<string>()); }
+
             return g;
         }
 
@@ -85,6 +87,8 @@ namespace MusicGraphStore.DataAccessLayer
             if (null == record) { return g; }
 
             if (record.Properties.ContainsKey("Name")) { g.Name = record.Properties["Name"].As<string>(); }
+
+            if (record.Properties.ContainsKey("Relevance")) { g.Relevance = float.Parse(record.Properties["Relevance"].As<string>()); }
 
             return g;
         }

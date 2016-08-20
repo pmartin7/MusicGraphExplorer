@@ -257,12 +257,11 @@ namespace MusicGraphStore.DataAccessLayer
                     //Get All Genres
                     var result = session.Run(
                             "MATCH (g:Genre)"
-                          + "RETURN DISTINCT g.Name AS Name");
+                          + "RETURN DISTINCT g");
 
                     foreach (var record in result)
                     {
-                        Genre genre = new Genre { Name = record["Name"].As<string>() };
-                        response.Add(genre);
+                        response.Add(Helpers.DeserializeNode(record["g"].As<INode>(), new Genre()));
                     }
                 }
                 catch (Exception e) { throw e; }
@@ -303,12 +302,7 @@ namespace MusicGraphStore.DataAccessLayer
                         int k = 0;
                         foreach (var node in path.Nodes)
                         {
-                            Artist artist = new Artist()
-                            {
-                                SpotifyId = node["SpotifyId"].As<string>(),
-                                Name = node["Name"].As<string>(),
-                                Popularity = node["Popularity"].As<int>()
-                            };
+                            Artist artist = Helpers.DeserializeNode(node, new Artist());
 
                             //not starting node --- provide the relevance of the relationship to the previous Artist
                             if (k>0)
@@ -349,20 +343,15 @@ namespace MusicGraphStore.DataAccessLayer
                 {
                     string query = "MATCH (a:Artist) "
                           + "WHERE a.Name =~ \"(?i).*" + name + ".*\" "
-                          + "RETURN a.Name as Name, a.Popularity as Popularity, a.SpotifyId as SpotifyId "
-                          + "ORDER BY Popularity DESC";
+                          + "RETURN a "
+                          + "ORDER BY a.Popularity DESC";
 
                     //get matchin artists
                     var result = session.Run(query);
 
                     foreach (var record in result)
                     {
-                        response.Add(new Artist()
-                        {
-                            Name = record["Name"].As<string>(),
-                            SpotifyId = record["SpotifyId"].As<string>(),
-                            Popularity = record["Popularity"].As<int>()
-                        });
+                        response.Add(Helpers.DeserializeNode(record["a"].As<INode>(), new Artist()));
                     }
                 }
                 catch (Exception e) { throw e; }
@@ -600,19 +589,14 @@ namespace MusicGraphStore.DataAccessLayer
                         + "WITH rows + collect({ genre: g2.Name, score: y}) AS allrows "
 
                         + "UNWIND allrows AS row "
-                        + "WITH row.genre AS genre, row.score AS score "
-                        + "RETURN distinct genre, sum(score) AS score ORDER BY score DESC ",
+                        + "WITH row.genre AS Name, row.score AS score "
+                        + "RETURN distinct Name, sum(score) AS Relevance ORDER BY Relevance DESC ",
                           new Dictionary<string, object> { { "inputgenre", genre.Name } });
 
                     //process records
                     foreach (var record in result)
                     {
-                        Genre item = new Genre()
-                        {
-                            Name = record["genre"].As<string>(),
-                            Relevance = record["score"].As<int>()
-                        };
-                        response.RelatedGenres.Add(item);
+                        response.RelatedGenres.Add(Helpers.DeserializeRecord(record, new Genre()));
                     }
                 }
                 catch (Exception e) { throw e; }
