@@ -80,8 +80,7 @@ namespace MusicGraphStore.DataAccessLayer
 
                     foreach (var record in result2)
                     {
-                        Genre g = new Genre();
-                        artist.Genres.Add(Helpers.deserializeRecord(record, g));
+                        artist.Genres.Add(Helpers.deserializeRecord(record, new Genre()));
                         artist.TotalGenres++;
                     }
                 }
@@ -115,13 +114,7 @@ namespace MusicGraphStore.DataAccessLayer
 
                     foreach (var record in result2)
                     {
-                        Artist item = new Artist()
-                        {
-                            Name = record["Name"].As<string>(),
-                            SpotifyId = record["SpotifyId"].As<string>(),
-                            Popularity = record["Popularity"].As<int>()
-                        };
-                        if (null != record["Relevance"]) { item.Relevance = float.Parse(record["Relevance"].As<string>()); }
+                        Artist item = Helpers.deserializeRecord(record, new Artist());
                         artist.RelatedArtists.Add(item);
                     }
                 }

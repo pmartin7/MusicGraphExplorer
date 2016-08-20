@@ -56,6 +56,21 @@ namespace MusicGraphStore.Test
             }
         }
 
+        [TestMethod]
+        public void GRAFSID_RelatedArtistRelevanceNotNull()
+        {
+            try
+            {
+                DataAccess dal = DataAccess.Instance;
+                Artist response = dal.GetRelatedArtistsForSpotifyId("22WZ7M8sxp5THdruNY3gXt"); //The Doors
+                Assert.IsTrue(null != response.RelatedArtists.Find( x => (x.Relevance >0)));
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
 
         [TestMethod]
         public void GAAFG_WithNullInput_ResponseNotEmpty()

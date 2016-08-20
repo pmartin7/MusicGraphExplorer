@@ -26,6 +26,8 @@ namespace MusicGraphStore.DataAccessLayer
 
             if (record.Keys.Contains<string>("Url")) { a.Url = record["Url"].As<string>(); }
 
+            if (record.Keys.Contains<string>("Relevance")) { a.Relevance = float.Parse(record["Relevance"].As<string>()); }
+
             return a;
         }
 
