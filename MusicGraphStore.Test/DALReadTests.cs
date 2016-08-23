@@ -175,6 +175,21 @@ namespace MusicGraphStore.Test
         }
 
         [TestMethod]
+        public void GAA_parallel_ResponseContainsArtist()
+        {
+            try
+            {
+                DataAccess dal = DataAccess.Instance;
+                List<Artist> response = dal.GetAllArtists_parallel();
+                Assert.IsTrue(response.Count > 0);
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        [TestMethod]
         public void GPBA_ResponseContainsArtistPathsAndArtistRelevance()
         {
             try
@@ -314,5 +329,38 @@ namespace MusicGraphStore.Test
         }
         #endregion
 
+        #region perf test
+
+        [TestMethod]
+        public void GAA_DiffAndPerf()
+        {
+            try
+            {
+                DataAccess dal = DataAccess.Instance;
+                
+                //single threaded foreach
+                DateTime start = DateTime.Now;
+                List<Artist> response = dal.GetAllArtists();
+                DateTime end = DateTime.Now;
+
+                //multi-threaded foreach
+                DateTime startp = DateTime.Now;
+                List<Artist> responsep = dal.GetAllArtists_parallel();
+                DateTime endp = DateTime.Now;
+
+                //display times
+                System.Diagnostics.Debug.WriteLine("Single threaded compute time: {0}", end-start);
+                System.Diagnostics.Debug.WriteLine("Multi threaded compute time: {0}", endp - startp);
+
+                //compare lists
+                Assert.IsTrue( (response.Count == responsep.Count) );
+            }
+            catch (Exception e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
+        #endregion
     }
 }

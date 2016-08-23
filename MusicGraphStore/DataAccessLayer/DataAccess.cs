@@ -188,6 +188,43 @@ namespace MusicGraphStore.DataAccessLayer
         }
 
         /// <summary>
+        /// Return all artists in the graph - multi-threaded result processing
+        /// Left here as a reference. Perf test (GAA_DiffAndPerf) shows that multi-threading overhead is not worth in this case 
+        /// </summary>
+        /// <returns></returns>
+        public List<Artist> GetAllArtists_parallel()
+        {
+            List<Artist> response = new List<Artist>();
+
+            using (var session = driver.Session())
+            {
+                try
+                {
+                    object sync = new Object();
+
+                    //Get All Genres
+                    var result = session.Run(
+                            "MATCH (a:Artist)"
+                          + "RETURN DISTINCT a");
+
+                    //It ***should*** be OK to keep response as a list and use the non thread safe IResult because we are
+                    //not modifying anythin in IResult result
+                    Parallel.ForEach(result, record =>
+                        {
+                            lock (sync)
+                            {
+                                response.Add(Helpers.DeserializeNode(record["a"].As<INode>(), new Artist()));
+                            }
+                        });
+                }
+                catch (Exception e) { throw e; }
+            }
+
+            return response;
+        }
+
+
+        /// <summary>
         /// Get all Artists classified by genres for the provided genres, ordered by popularity within each genre. 
         /// If input is empty, this method will return all artists and genres.
         /// The response can return the same artist for multiple genres.
