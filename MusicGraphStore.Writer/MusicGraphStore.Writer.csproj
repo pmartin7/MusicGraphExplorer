@@ -7,7 +7,7 @@
     <ProjectGuid>{1F88BEA3-9BBA-4B7C-A1C0-21596888E798}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MusicGraphStore.writer</RootNamespace>
+    <RootNamespace>MusicGraphStore.Writer</RootNamespace>
     <AssemblyName>MusicGraphStore.Writer</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -77,11 +77,23 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="SeedArtists.cs" />
+    <Compile Include="SeedingMode.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="TestMethods\ConsoleTest_old.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MusicGraphStore\MusicGraphStore.csproj">

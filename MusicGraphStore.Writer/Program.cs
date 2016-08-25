@@ -17,80 +17,52 @@ namespace MusicGraphStore.Writer
             
             //declarations
             DataAccess dal = DataAccess.Instance;
+            
 
-            //retrieve artist and genre graph from spotify and insert into the store
-            //start with four seeds: Nine Inch Nails, The Naked and Famous, Jack Johnson, Saing Germain des Pres
-            string nineInchNailsSeedSpotifyId = "0X380XXQSNBYuleKzav5UO";
-            string TNFSpotifyId = "0oeUpvxWsC8bWS6SnpU8b9";
-            string JJSpotifyId = "3GBPw9NK25X1Wt2OUvOwY3";
-            string SGDPSpotifyId = "484sZUYmnRXN84zmk3GY1n";
-            string TheDoorsSId = "22WZ7M8sxp5THdruNY3gXt";
-            string BobMarleySId = "28raJmIB4blKdjookHKbBJ";
-            string ParisComboSId = "5xDjKV6UvzyrI3RnwHq02G";
-            string HerbieHancockSId = "2ZvrvbQNrHKwjT7qfGFFUW";
-            string PhilCollinsSId = "4lxfqrEsLX6N1N4OCSkILp";
-            string RamonesSId = "1co4F2pPNH8JjTutZkmgSm";
-            string DaftPunkSId = "4tZwfgrHOc3mvqYlEYSvVi";
-            string RachelPlattenSId = "3QLIkT4rD2FMusaqmkepbq";
-            string Jamiroquai = "6J7biCazzYhU3gM9j1wfid";
-            string IamSId = "56Q6weEROZ1RsVrTak8Bm7";
-            string MelvinsSId = "6aVjo0xHSiuW5hkasoYSR3";
-            string AhmadJamalSId = "0mj1trLDvMoZFkKVIobIbd";
-            string FCKahunaSId = "1UQ5GQDdYPKgbIEn9sMiSg";
-            string TheSugarcubesSId = "1G0Xwj8mza6b03iYkVdzDP";
-            string REMSId = "4KWTAlx2RvbpseOGMEmROg";
-            string AyoSId = "6OkX55UMCw4Hgc5HM4zr7K";
-            string TheMohawksSId = "5EasC32GkrcTsCH1VF4xKy";
-            string GeneralElektriksSId = "5ly9gfnncBXv77g2zuRG9m";
-            string GorillazSId = "3AA28KZvwAUcZuOKwyblJQ";
-            string TheCardigansSId = "1tqZaCwM57UFKjWoYwMLrw";
-            string KeziahJonesSId = "7fkVKWnSaQNFwqrR62vsSo";
-            string KronosQuartetSId = "6qU2x4UbHIEOLsz645esEI";
-            string FerryCorstenSId = "2ohlvFf9PBsDELdRstPtlP";
-            string BobSinclarSId = "5YFS41yoX0YuFY39fq21oN";
-            string ManuChaoSId = "6wH6iStAh4KIaWfuhf0NYM";
-
-
+            //load a set of constant seed srtists
             List<string> seeds = new List<string>();
-            seeds.Add(nineInchNailsSeedSpotifyId);
-            seeds.Add(TNFSpotifyId);
-            seeds.Add(JJSpotifyId);
-            seeds.Add(SGDPSpotifyId);
-            seeds.Add(TheDoorsSId);
-            seeds.Add(BobMarleySId);
-            seeds.Add(ParisComboSId);
-            seeds.Add(HerbieHancockSId);
-            seeds.Add(PhilCollinsSId);
-            //seeds.Add(RamonesSId);
-            //seeds.Add(RachelPlattenSId);
-            //seeds.Add(DaftPunkSId);
-            //seeds.Add(Jamiroquai);
-            //seeds.Add(IamSId);
-            //seeds.Add(MelvinsSId);
-            //seeds.Add(AhmadJamalSId);
-            //seeds.Add(FCKahunaSId);
-            //seeds.Add(TheSugarcubesSId);
-            //seeds.Add(REMSId);
-            //seeds.Add(AyoSId);
-            //seeds.Add(TheMohawksSId);
-            //seeds.Add(GeneralElektriksSId);
-            //seeds.Add(GorillazSId);
-            //seeds.Add(TheCardigansSId);
-            //seeds.Add(KeziahJonesSId);
-            //seeds.Add(KronosQuartetSId);
-            //seeds.Add(FerryCorstenSId);
-            //seeds.Add(BobSinclarSId);
-            //seeds.Add(ManuChaoSId);
+            InitializeSeeds(seeds);
 
-            int N = 1500;
-            buildSpotifyGraph(dal, seeds, N);
-            //buildSpotifyGraph_old(dal, seeds, N);
+            //pull a a graph of related artists and genres from spotify and insert them into our graph store
+            if (Properties.Settings.Default.BuildSpotifyGraph == true)
+            {
+                buildSpotifyGraph(dal, seeds, Properties.Settings.Default.N);
+                //buildSpotifyGraph_old(dal, seeds, N);
+            }
 
             //then post-process graph to compute related genres, and insert/update related genres and scores in the graph
-            computeAndInsertRelatedGenres(dal);
+            if (Properties.Settings.Default.ComputeGenreRelevance == true)
+            {
+                computeAndInsertRelatedGenres(dal);
+            }
 
             //then post-process and add a relevance score to artist-artist relations
-            computeAndInsertRelatedArtists(dal);
+            if (Properties.Settings.Default.ComputeArtistRelationship == true)
+            {
+                computeAndInsertRelatedArtists_parallel(dal, 0, 0);
+            }
+
+
+            //performance test mode for multi-threaded processing
+            if (Properties.Settings.Default.PerfTest == true)
+            {
+                //warm up - throw away round
+                computeAndInsertRelatedArtists(dal, 0, 3);
+                
+                //single threaded
+                DateTime start = DateTime.Now;
+                computeAndInsertRelatedArtists(dal, 0, 10);
+                DateTime end = DateTime.Now;
+
+                //multi-threaded
+                DateTime startm = DateTime.Now;
+                computeAndInsertRelatedArtists_parallel(dal, 0, 10);
+                DateTime endm = DateTime.Now;
+                
+                //display test results
+                Console.WriteLine("Singlethreaded runtime: {0}", end - start);
+                Console.WriteLine("Multithreaded runtime: {0}", endm - startm);
+            }
 
             Console.Read();
 
@@ -122,6 +94,45 @@ namespace MusicGraphStore.Writer
             #endregion
 
         }
+
+        #region Helpers
+        private static void InitializeSeeds(List<string> seeds)
+        {
+            seeds.Add(SeedArtists.nineInchNailsSeedSpotifyId);
+            seeds.Add(SeedArtists.TNFSpotifyId);
+            seeds.Add(SeedArtists.JJSpotifyId);
+            seeds.Add(SeedArtists.SGDPSpotifyId);
+            seeds.Add(SeedArtists.TheDoorsSId);
+            seeds.Add(SeedArtists.BobMarleySId);
+            seeds.Add(SeedArtists.ParisComboSId);
+            seeds.Add(SeedArtists.HerbieHancockSId);
+            seeds.Add(SeedArtists.PhilCollinsSId);
+
+            if (Properties.Settings.Default.SeedingMode == SeedingMode.Full)
+            {
+                seeds.Add(SeedArtists.RamonesSId);
+                seeds.Add(SeedArtists.RachelPlattenSId);
+                seeds.Add(SeedArtists.DaftPunkSId);
+                seeds.Add(SeedArtists.Jamiroquai);
+                seeds.Add(SeedArtists.IamSId);
+                seeds.Add(SeedArtists.MelvinsSId);
+                seeds.Add(SeedArtists.AhmadJamalSId);
+                seeds.Add(SeedArtists.FCKahunaSId);
+                seeds.Add(SeedArtists.TheSugarcubesSId);
+                seeds.Add(SeedArtists.REMSId);
+                seeds.Add(SeedArtists.AyoSId);
+                seeds.Add(SeedArtists.TheMohawksSId);
+                seeds.Add(SeedArtists.GeneralElektriksSId);
+                seeds.Add(SeedArtists.GorillazSId);
+                seeds.Add(SeedArtists.TheCardigansSId);
+                seeds.Add(SeedArtists.KeziahJonesSId);
+                seeds.Add(SeedArtists.KronosQuartetSId);
+                seeds.Add(SeedArtists.FerryCorstenSId);
+                seeds.Add(SeedArtists.BobSinclarSId);
+                seeds.Add(SeedArtists.ManuChaoSId);
+            }
+        }
+        #endregion
 
         #region Build Spotify Graph
         /// <summary>
@@ -383,19 +394,48 @@ namespace MusicGraphStore.Writer
         /// This method will compute a relationship score for related artists, then insert the relationship score in the grap
         /// </summary>
         /// <param name="dal"></param>
-        private static void computeAndInsertRelatedArtists(DataAccess dal)
+        /// <param name="pageSize">number of artists to process</param>
+        /// <param name="pageStart">starting index of artists to process in the list of retrieved artists</param>
+        private static void computeAndInsertRelatedArtists(DataAccess dal, int pageStart, int pageSize)
         {
             //first get all artists
             List<MusicGraphStore.GraphDataModel.Artist> artists = dal.GetAllArtists();
 
+            if (pageSize == 0) { pageSize = artists.Count; }
+
             //then for each artist, compute related artists and relevance score
             //and finally insert relationship in the graph with the new relevance score
-            foreach (var artist in artists)
+            for (int i = pageStart; i < Math.Min(artists.Count, pageStart + pageSize); i++ )
             {
-                MusicGraphStore.GraphDataModel.Artist a = dal.ComputeRelatedArtistRelevance(artist);
+                MusicGraphStore.GraphDataModel.Artist a = dal.ComputeRelatedArtistRelevance(artists[i]);
                 dal.InsertOrUpdateRelatedArtistsForArtist(a);
                 Console.WriteLine("inserted {0} relationship scores for artist: {1}", a.RelatedArtists.Count, a.Name);
             }
+        }
+
+        /// <summary>
+        /// This method will compute a relationship score for related artists, then insert the relationship score in the grap
+        /// Using a multi-threaded implementation of the iteration
+        /// </summary>
+        /// <param name="dal"></param>
+        /// <param name="dal"></param>
+        private static void computeAndInsertRelatedArtists_parallel(DataAccess dal, int pageStart, int pageSize)
+        {
+            //first get all artists
+            List<MusicGraphStore.GraphDataModel.Artist> artists = dal.GetAllArtists();
+
+            if (pageSize == 0) { pageSize = artists.Count; }
+
+            //then for each artist, compute related artists and relevance score
+            //and finally insert relationship in the graph with the new relevance score
+            Object sync = new Object();
+            
+            Parallel.For(pageStart, Math.Min(artists.Count, pageStart + pageSize), i =>
+            {
+                MusicGraphStore.GraphDataModel.Artist a = dal.ComputeRelatedArtistRelevance(artists[i]);
+                dal.InsertOrUpdateRelatedArtistsForArtist(a);
+                Console.WriteLine("inserted {0} relationship scores for artist: {1}", a.RelatedArtists.Count, a.Name);
+            });
         }
         #endregion
 
