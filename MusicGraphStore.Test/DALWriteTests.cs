@@ -67,5 +67,40 @@ namespace MusicGraphStore.Test
                 Assert.Fail(e.Message);
             }
         }
+
+        [TestMethod]
+        public void GUS_GenreRelationshipReadWrite_Base()
+        {
+            GraphUpdateState state = new GraphUpdateState() { Type = GraphUpdateStates.GenreRelationship };
+
+            //update times and number of records
+            DateTime instructionStartTime = DateTime.Now;
+            state.SyncLastInstructionAddedStartDtTm();
+
+            DateTime instructionEndTime = DateTime.Now;
+            state.SyncLastInstructionAddedEndDtTm();
+
+            DateTime updateStartTime = DateTime.Now;
+            state.SyncLastUpdateStartdDtTm();
+
+            DateTime updateEndTime = DateTime.Now;
+            state.SyncLastUpdateEndDtTm();
+
+            int number = 100;
+            state.SyncNumberOfNodesUpdated(number);
+
+            //refresh object attributes from Db
+            state.RefreshFromDb();
+
+            TimeSpan allowedTimeSpan = new TimeSpan(0, 0, 1);
+
+            Assert.IsTrue(
+                ( state.NumberOfNodesUpdated == number)
+             && ( (state.LastInstructionAddedStartDtTm - instructionStartTime).Duration() < allowedTimeSpan )
+             && ( (state.LastInstructionAddedEndDtTm - instructionEndTime).Duration() < allowedTimeSpan )
+             && ( (state.LastUpdateStartDtTm - updateStartTime).Duration() < allowedTimeSpan )
+             && ( (state.LastUpdateEndDtTm - updateEndTime).Duration() < allowedTimeSpan )
+                );
+        }
     }
 }

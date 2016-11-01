@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Neo4j.Driver.V1;
 using MusicGraphStore.GraphDataModel;
+using System.Globalization;
 
 namespace MusicGraphStore.DataAccessLayer
 {
@@ -826,6 +827,87 @@ namespace MusicGraphStore.DataAccessLayer
             response.RelatedArtists.Sort((item1, item2) => (item2.Relevance.CompareTo(item1.Relevance)));
 
             return response;
+        }
+        #endregion
+
+        #region Public Graph Update State Management Methods
+
+        public void UpdateGraphUpdateState(GraphUpdateState state, string dateAttribute)
+        {
+            using (var session = driver.Session())
+            {
+                try
+                {
+                    //create or update the attribute that is passed in
+                    session.Run(
+                        "MERGE (s:GraphUpdateState {Type:{Type}}) "
+                      + "ON MATCH SET s." + dateAttribute + " = {Date} "
+                      + "ON CREATE SET s." + dateAttribute + " = {Date} ",
+                        new Dictionary<string, object> { { "Type", state.Type }, { "Date", DateTime.UtcNow.ToString("u", DateTimeFormatInfo.InvariantInfo)} });
+                }
+                catch (Exception e) { throw e; }
+            }
+        }
+
+        public void UpdateGraphUpdateStateNumberOfRecords(GraphUpdateState state, int numberOfRecords)
+        {
+            using (var session = driver.Session())
+            {
+                try
+                {
+                    //create or update the attribute that is passed in
+                    session.Run(
+                        "MERGE (s:GraphUpdateState {Type:{Type}}) "
+                      + "ON MATCH SET s.NumberOfRecordsUpdated = {Number} "
+                      + "ON CREATE SET s.NumberOfRecordsUpdated = {Number}",
+                        new Dictionary<string, object> { { "Type", state.Type }, { "Number", numberOfRecords} });
+                }
+                catch (Exception e) { throw e; }
+            }
+        }
+
+        public GraphUpdateState GetGraphUpdateState(string type)
+        {
+            using (var session = driver.Session())
+            {
+                try
+                {
+                    //Get the graph update state object for the passed in type
+                    //There should be only one. If multiple by mistake grabbing the top 1
+                    var result = session.Run(
+                        "MATCH (s:GraphUpdateState {Type:{Type}}) "
+                      + "RETURN s.LastInstructionAddedEndDtTm AS LastInstructionAddedEndDtTm, "
+                      + "s.LastInstructionAddedStartDtTm AS LastInstructionAddedStartDtTm, "
+                      + "s.LastGraphUpdateStartDtTm AS LastGraphUpdateStartDtTm, "
+                      + "s.LastGraphUpdateEndDtTm AS LastGraphUpdateEndDtTm, "
+                      + "s.NumberOfRecordsUpdated AS NumberOfRecordsUpdated",
+                        new Dictionary<string, object> { { "Type", type }});
+
+                    GraphUpdateState state = new GraphUpdateState();
+
+                    int n = 0;
+
+                    foreach (var record in result)
+                    {
+                        if (n == 0)
+                        {
+                            state = new GraphUpdateState()
+                            {
+                                Type = type,
+                                LastInstructionAddedStartDtTm = DateTime.Parse(record["LastInstructionAddedStartDtTm"].As<string>(), DateTimeFormatInfo.InvariantInfo),
+                                LastInstructionAddedEndDtTm = DateTime.Parse(record["LastInstructionAddedEndDtTm"].As<string>(), DateTimeFormatInfo.InvariantInfo),
+                                LastUpdateStartDtTm = DateTime.Parse(record["LastGraphUpdateStartDtTm"].As<string>(), DateTimeFormatInfo.InvariantInfo),
+                                LastUpdateEndDtTm = DateTime.Parse(record["LastGraphUpdateEndDtTm"].As<string>(), DateTimeFormatInfo.InvariantInfo),
+                                NumberOfNodesUpdated = record["NumberOfRecordsUpdated"].As<int>()
+                            };
+                        }
+                        n++;
+                    }
+
+                    return state;
+                }
+                catch (Exception e) { throw e; }
+            }
         }
         #endregion
     }

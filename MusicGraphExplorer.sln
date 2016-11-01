@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicGraphStore", "MusicGraphStore\MusicGraphStore.csproj", "{00E62179-95E8-42D6-B65A-A8AABDD6E10B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicGraphStore.Test", "MusicGraphStore.Test\MusicGraphStore.Test.csproj", "{D49B2326-1E8F-457E-B1C7-F075F8CF789C}"
@@ -8,6 +10,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicGraphStore.Writer", "MusicGraphStore.Writer\MusicGraphStore.Writer.csproj", "{1F88BEA3-9BBA-4B7C-A1C0-21596888E798}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "SampleApp\SampleApp.csproj", "{6A5B6FF4-4C59-430D-BA6F-7A6C191A72AF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicGraphStore.Write", "MusicGraphStore.Write\MusicGraphStore.Write.csproj", "{2F92CAC4-2DAF-4019-9319-A5B72313A6F8}"
+EndProject
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "MuscGraphStore.WriterService", "MuscGraphStore.WriterService\MuscGraphStore.WriterService.ccproj", "{F4FF9043-671F-410E-8D71-5B7F46C3E48B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphWriterService", "GraphWriterService\GraphWriterService.csproj", "{EA055838-8D06-4E2D-A571-30334929C684}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,11 +39,20 @@ Global
 		{6A5B6FF4-4C59-430D-BA6F-7A6C191A72AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A5B6FF4-4C59-430D-BA6F-7A6C191A72AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A5B6FF4-4C59-430D-BA6F-7A6C191A72AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F92CAC4-2DAF-4019-9319-A5B72313A6F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F92CAC4-2DAF-4019-9319-A5B72313A6F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F92CAC4-2DAF-4019-9319-A5B72313A6F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F92CAC4-2DAF-4019-9319-A5B72313A6F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4FF9043-671F-410E-8D71-5B7F46C3E48B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4FF9043-671F-410E-8D71-5B7F46C3E48B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4FF9043-671F-410E-8D71-5B7F46C3E48B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4FF9043-671F-410E-8D71-5B7F46C3E48B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA055838-8D06-4E2D-A571-30334929C684}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA055838-8D06-4E2D-A571-30334929C684}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA055838-8D06-4E2D-A571-30334929C684}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA055838-8D06-4E2D-A571-30334929C684}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal
