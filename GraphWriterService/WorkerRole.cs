@@ -78,11 +78,24 @@ namespace GraphWriterService
                 ////TODO: add instructions to queue for all types of update operations
                 ////TODO: note - update from spotify has an interesting pattern as the dequeuer will continue enqueeing work until a condition is reached
 
+                //get from db the latest time at which updates happened
+                GraphUpdateState state = new GraphUpdateState() { Type = GraphUpdateStates.GenreRelationship };
+                state.RefreshFromDb();
+
                 //First generate instructions to update genre relationships
-                await this.InstructUpdateGenreRelationships();
+                ////TODO: make timespan configurable
+                if ((DateTime.Now - state.LastInstructionAddedEndDtTm) > new TimeSpan(0, 7, 0))
+                {
+                    await this.InstructUpdateGenreRelationships();
+                }
+                else
+                {
+                    Thread.Sleep(new TimeSpan(0, 1, 0));
+                    System.Diagnostics.Debug.WriteLine("Waiting to add Genre relationship instructions to queue");
+                }
 
                 //Then process instructions on the queue
-                await this.ProcessInstructionQueue();
+                this.ProcessInstructionQueue();
 
                 // process update genre relationship relevance
                 //System.Diagnostics.Debug.WriteLine("Starting to update genre relationships");
@@ -115,12 +128,22 @@ namespace GraphWriterService
                 int n = 0;
 
                 //then for each genre, compute the related genres, and insert
+                GraphUpdateState genreState = new GraphUpdateState() { Type = GraphUpdateStates.GenreRelationship };
+
                 foreach (Genre genre in genres)
                 {
-                    n++;
                     await qal.EnqueueGenreRelationshipInstruction(genre);
+
+                    //if this is the first instruction, update state accordingly
+                    if (n == 0) { genreState.SyncLastInstructionAddedStartDtTm(); }
+
                     System.Diagnostics.Debug.WriteLine("Added instruction {0}/{1}", n, genres.Count);
+
+                    n++;
                 }
+
+                //finally, update state to reflect that last instruction was added
+                genreState.SyncLastInstructionAddedEndDtTm();
             }
             catch (Exception e)
             {
@@ -141,26 +164,34 @@ namespace GraphWriterService
 
                 DataAccess dal = DataAccess.Instance;
 
+                GraphUpdateState genreRelationshipState = new GraphUpdateState() { Type = GraphUpdateStates.GenreRelationship }; ////TODO - make this a class constant
+
                 int n = 0;
+                InstructionMessage newInstruction;
+
                 while (!isEmpty)
                 {
-                    InstructionMessage instruction = await qal.DequeueInstruction();
-                    if (null != instruction)
+                    newInstruction = await qal.DequeueInstruction();
+
+                    if (null != newInstruction)
                     {
-                        if (null != instruction.InstructionKey)
+                        if (null != newInstruction.InstructionKey)
                         {
-                            switch (instruction.InstructionCode)
+                            switch (newInstruction.InstructionCode)
                             {
                                 case InstructionCodes.UpdateGenreRelationships:
-                                    Genre genre = new Genre() { Name = instruction.InstructionKey };
+                                    Genre genre = new Genre() { Name = newInstruction.InstructionKey };
                                     Genre response = dal.ComputeRelatedGenresForGenre(genre);
                                     dal.InsertOrUpdateRelatedGenresForGenre(response);
                                     System.Diagnostics.Debug.WriteLine("{2}/{3} - updated {0} related genres for: {1}", response.RelatedGenres.Count, response.Name, n, size);
+                                    //update state
+                                    if (n == 0) { genreRelationshipState.SyncLastUpdateStartdDtTm(); }
+                                    genreRelationshipState.SyncLastUpdateEndDtTm(); // keep on updating while there are messages on queue
                                     break;
+                                ////TODO: Handle cases for artist relationship, update graph from spotify, and artist genre relevance
                                 default:
                                     break;
                             }
-
                         }
                     }
                     else
@@ -168,6 +199,7 @@ namespace GraphWriterService
                         isEmpty = true;
                         //queue is empty. 
                     }
+
                     n = (n + 1 + 10000) % 10000;
                 }
             }
