@@ -79,10 +79,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\Config.cs" />
     <Compile Include="InstructionCodes.cs" />
     <Compile Include="InstructionMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueAccessLayer.cs" />
+    <Compile Include="WorkerEntryPoint.cs" />
+    <Compile Include="WorkerGenreRelationshipQueueWriter.cs" />
+    <Compile Include="WorkerInstructionQueueProcessor.cs" />
     <Compile Include="WorkerRole.cs" />
   </ItemGroup>
   <ItemGroup>
