@@ -12,6 +12,11 @@ namespace MusicGraphExplorerAPI
 {
     public class MusicGraphAPI : IMusicGraphAPI
     {
+        /// <summary>
+        /// Get the artist matching the provided spotifyId
+        /// </summary>
+        /// <param name="spotifyId"></param>
+        /// <returns></returns>
         public Artist GetArtistForSpotifyId(string spotifyId)
         {
             //create instance of data access layer to music graph store
@@ -20,5 +25,20 @@ namespace MusicGraphExplorerAPI
             //get artist from music graph store
             return dal.GetArtistForSpotifyId(spotifyId);
         }
+
+        /// <summary>
+        /// Get all artists related to the artist matching the provided spotifyId
+        /// </summary>
+        /// <param name="spotifyId"></param>
+        /// <returns></returns>
+        public Artist GetRelatedArtistsForSpotifyId(string spotifyId)
+        {
+            //create instance of data access layer to music graph store
+            DataAccess dal = DataAccess.Instance;
+
+            //get artist from music graph store
+            return dal.GetRelatedArtistsForSpotifyId(spotifyId);
+        }
     }
+
 }

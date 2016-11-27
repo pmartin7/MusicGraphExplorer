@@ -19,5 +19,11 @@ namespace MusicGraphExplorerAPI
             BodyStyle = WebMessageBodyStyle.Bare)]
         Artist GetArtistForSpotifyId(string spotifyId);
 
+        [OperationContract]
+        [WebGet(UriTemplate = "/artist/{spotifyId}/related",
+    RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json,
+            BodyStyle = WebMessageBodyStyle.Bare)]
+        Artist GetRelatedArtistsForSpotifyId(string spotifyId);
+
     }
 }
