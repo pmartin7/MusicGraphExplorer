@@ -43,7 +43,7 @@ namespace MusicGraphStore.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("bolt://localhost")]
+        [global::System.Configuration.DefaultSettingValueAttribute("bolt://musicgraphdb.cloudapp.net/")]
         public string neo4jSrv {
             get {
                 return ((string)(this["neo4jSrv"]));

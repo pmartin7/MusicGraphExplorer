@@ -9,7 +9,7 @@
       <Value Profile="(Default)">Gr@phexplore1</Value>
     </Setting>
     <Setting Name="neo4jSrv" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">bolt://localhost</Value>
+      <Value Profile="(Default)">bolt://musicgraphdb.cloudapp.net/</Value>
     </Setting>
   </Settings>
 </SettingsFile>
