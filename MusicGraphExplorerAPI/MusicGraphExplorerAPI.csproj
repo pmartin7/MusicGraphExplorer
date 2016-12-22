@@ -98,6 +98,15 @@
     <Content Include="MusicGraphAPI.svc" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataContract\GetArtistAndRelatedArtistsResponse.cs" />
+    <Compile Include="DataContract\GetGenreAndRelatedArtistsResponse.cs" />
+    <Compile Include="DataContract\GetRelatedArtistResponse.cs" />
+    <Compile Include="DataContract\GetGenreAndRelatedGenresResponse.cs" />
+    <Compile Include="DataContract\GetGenreResponse.cs" />
+    <Compile Include="DataContract\SearchArtistResponse.cs" />
+    <Compile Include="DataContract\GetArtistResponse.cs" />
+    <Compile Include="DataContract\GetRelatedGenreResponse.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="MusicGraphAPI.svc.cs">
       <DependentUpon>MusicGraphAPI.svc</DependentUpon>
     </Compile>

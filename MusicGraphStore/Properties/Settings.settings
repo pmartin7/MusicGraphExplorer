@@ -11,5 +11,8 @@
     <Setting Name="neo4jSrv" Type="System.String" Scope="Application">
       <Value Profile="(Default)">bolt://musicgraphdb.cloudapp.net/</Value>
     </Setting>
+    <Setting Name="debugSrv" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">bolt://localhost</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

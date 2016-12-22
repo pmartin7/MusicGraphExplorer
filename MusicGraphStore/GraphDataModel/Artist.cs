@@ -19,10 +19,10 @@ namespace MusicGraphStore.GraphDataModel
         public string Name { get; set;}
 
         [DataMember]
-        public string SpotifyId { get; set; }
+        public int Popularity { get; set; }
 
         [DataMember]
-        public int Popularity { get; set; }
+        public string SpotifyId { get; set; }
 
         [DataMember]
         public string Url { get; set; }

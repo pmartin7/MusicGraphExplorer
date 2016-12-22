@@ -32,14 +32,29 @@ namespace MusicGraphStore.DataAccessLayer
         //private constructor
         private DataAccess()
         {
-            driver = GraphDatabase.Driver(
-                Properties.Settings.Default.neo4jSrv, 
-                AuthTokens.Basic(Properties.Settings.Default.neo4jUsr, Properties.Settings.Default.neo4jPwd));
+            Boolean isDebugMode = false;
+          #if DEBUG
+            isDebugMode = true;
+          #endif
+
+                if (isDebugMode)
+            {
+                driver = GraphDatabase.Driver(
+                    Properties.Settings.Default.debugSrv,
+                    AuthTokens.Basic(Properties.Settings.Default.neo4jUsr, Properties.Settings.Default.neo4jPwd));
+            }
+            else
+            {
+                driver = GraphDatabase.Driver(
+                    Properties.Settings.Default.neo4jSrv,
+                    AuthTokens.Basic(Properties.Settings.Default.neo4jUsr, Properties.Settings.Default.neo4jPwd));
+            }
+
         }
 
-        #endregion
+#endregion
 
-        #region Public Read Methods
+#region Public Read Methods
 
         /// <summary>
         /// Get an Artist metadata corresponding to the spotifyId provided, and its Genres
@@ -393,9 +408,9 @@ namespace MusicGraphStore.DataAccessLayer
 
             return response;
         }
-        #endregion
+#endregion
 
-        #region Public Search Methods
+#region Public Search Methods
 
         /// <summary>
         /// Search all artists whose name contains the provided string. Search is case insensitive.
@@ -430,9 +445,9 @@ namespace MusicGraphStore.DataAccessLayer
             return response;
         }
 
-        #endregion
+#endregion
 
-        #region Public Write Methods
+#region Public Write Methods
         /// <summary>
         /// Insert of update one artist in the Music Graph store
         /// </summary>
@@ -623,9 +638,9 @@ namespace MusicGraphStore.DataAccessLayer
             }
         }
 
-        #endregion
+#endregion
 
-        #region Public Compute Methods
+#region Public Compute Methods
         /// <summary>
         /// Note: this method computes the score for genres related to a given genre
         /// Related genres are either other genres of artist in the given genre,
@@ -828,9 +843,9 @@ namespace MusicGraphStore.DataAccessLayer
 
             return response;
         }
-        #endregion
+#endregion
 
-        #region Public Graph Update State Management Methods
+#region Public Graph Update State Management Methods
 
         public void UpdateGraphUpdateState(GraphUpdateState state, string dateAttribute)
         {
@@ -909,6 +924,6 @@ namespace MusicGraphStore.DataAccessLayer
                 catch (Exception e) { throw e; }
             }
         }
-        #endregion
+#endregion
     }
 }

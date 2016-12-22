@@ -6,6 +6,7 @@ using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
 using MusicGraphStore.GraphDataModel;
+using MusicGraphExplorerAPI.DataContract;
 
 namespace MusicGraphExplorerAPI
 {
@@ -17,43 +18,43 @@ namespace MusicGraphExplorerAPI
         [WebGet(UriTemplate ="/artist/{spotifyId}", 
             RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Bare)]
-        Artist GetArtistForSpotifyId(string spotifyId);
+        GetArtistResponse GetArtistForSpotifyId(string spotifyId);
 
         [OperationContract]
         [WebGet(UriTemplate = "/artist/search?n={name}",
             RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Bare)]
-        List<Artist> SearchArtistByName(string name);
+        List<SearchArtistResponse> SearchArtistByName(string name);
 
         [OperationContract]
         [WebGet(UriTemplate = "/artist/{spotifyId}/related",
             RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Bare)]
-        Artist GetRelatedArtistsForSpotifyId(string spotifyId);
+        GetArtistAndRelatedArtistsResponse GetRelatedArtistsForSpotifyId(string spotifyId);
 
         [OperationContract]
         [WebGet(UriTemplate = "/artist/path?from={fromSpotifyId}&to={toSpotifyId}&size={pageSize}",
             RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Bare)]
-        List<List<Artist>> GetPathsBetweenArtists(string fromSpotifyId, string toSpotifyId, int pageSize);
+        List<List<GetRelatedArtistResponse>> GetPathsBetweenArtists(string fromSpotifyId, string toSpotifyId, int pageSize);
 
         [OperationContract]
         [WebGet(UriTemplate = "/genre/{genre}/related",
             RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Bare)]
-        Genre GetRelatedGenresForGenre(string genre);
+        GetGenreAndRelatedGenresResponse GetRelatedGenresForGenre(string genre);
 
         [OperationContract]
         [WebGet(UriTemplate = "/genre/{genre}/artists",
             RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Bare)]
-        Genre GetArtistsForGenre(string genre);
+        GetGenreAndRelatedArtistsResponse GetArtistsForGenre(string genre);
 
         [OperationContract]
         [WebGet(UriTemplate = "/genres",
             RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Bare)]
-        List<Genre> GetAllGenres();
+        List<GetGenreResponse> GetAllGenres();
 
     }
 }

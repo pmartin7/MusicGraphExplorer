@@ -49,5 +49,14 @@ namespace MusicGraphStore.Properties {
                 return ((string)(this["neo4jSrv"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("bolt://localhost")]
+        public string debugSrv {
+            get {
+                return ((string)(this["debugSrv"]));
+            }
+        }
     }
 }

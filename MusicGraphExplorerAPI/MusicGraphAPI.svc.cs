@@ -7,6 +7,7 @@ using System.ServiceModel.Web;
 using System.Text;
 using MusicGraphStore.DataAccessLayer;
 using MusicGraphStore.GraphDataModel;
+using MusicGraphExplorerAPI.DataContract;
 
 namespace MusicGraphExplorerAPI
 {
@@ -17,14 +18,16 @@ namespace MusicGraphExplorerAPI
         /// </summary>
         /// <param name="spotifyId"></param>
         /// <returns></returns>
-        public Artist GetArtistForSpotifyId(string spotifyId)
+        public GetArtistResponse GetArtistForSpotifyId(string spotifyId)
         {
             //create instance of data access layer to music graph store
             ////TODO : make dal instance a static property shared across all public methods of the web service
             DataAccess dal = DataAccess.Instance;
 
             //get artist from music graph store
-            return dal.GetArtistForSpotifyId(spotifyId);
+            Artist a = dal.GetArtistForSpotifyId(spotifyId);
+            GetArtistResponse response = new GetArtistResponse( dal.GetArtistForSpotifyId(spotifyId));
+            return response;
         }
 
         /// <summary>
@@ -32,13 +35,15 @@ namespace MusicGraphExplorerAPI
         /// </summary>
         /// <param name="spotifyId"></param>
         /// <returns></returns>
-        public Artist GetRelatedArtistsForSpotifyId(string spotifyId)
+        public GetArtistAndRelatedArtistsResponse GetRelatedArtistsForSpotifyId(string spotifyId)
         {
             //create instance of data access layer to music graph store
             DataAccess dal = DataAccess.Instance;
 
             //get related artists from music graph store
-            return dal.GetRelatedArtistsForSpotifyId(spotifyId);
+            Artist a = dal.GetRelatedArtistsForSpotifyId(spotifyId);
+            GetArtistAndRelatedArtistsResponse response = new GetArtistAndRelatedArtistsResponse(a);
+            return response;
         }
 
         /// <summary>
@@ -46,13 +51,15 @@ namespace MusicGraphExplorerAPI
         /// </summary>
         /// <param name="spotifyId"></param>
         /// <returns></returns>
-        public Genre GetRelatedGenresForGenre(string genre)
+        public GetGenreAndRelatedGenresResponse GetRelatedGenresForGenre(string genre)
         {
             //create instance of data access layer to music graph store
             DataAccess dal = DataAccess.Instance;
 
             //get related genres from music graph store
-            return dal.GetRelatedGenresForGenre(genre);
+            Genre result = dal.GetRelatedGenresForGenre(genre);
+            GetGenreAndRelatedGenresResponse response = new GetGenreAndRelatedGenresResponse(result);
+            return response;
         }
 
 
@@ -61,7 +68,7 @@ namespace MusicGraphExplorerAPI
         /// </summary>
         /// <param name="genre"></param>
         /// <returns></returns>
-        public Genre GetArtistsForGenre(string genre)
+        public GetGenreAndRelatedArtistsResponse GetArtistsForGenre(string genre)
         {
             //create instance of data access layer to music graph store
             DataAccess dal = DataAccess.Instance;
@@ -70,11 +77,11 @@ namespace MusicGraphExplorerAPI
             List<Genre> genres = dal.GetAllArtistsForGenres(
                 new List<Genre>() { new Genre() { Name = genre } });
 
-            Genre response = new Genre() { Name = genre };
+            GetGenreAndRelatedArtistsResponse response = new GetGenreAndRelatedArtistsResponse();
 
             if (null != genres)
             {
-                response = genres[0];
+                response = new GetGenreAndRelatedArtistsResponse(genres[0]);
             }
 
             return response;
@@ -84,13 +91,22 @@ namespace MusicGraphExplorerAPI
         /// Get All Genres in the music graph store
         /// </summary>
         /// <returns>list of Genres</returns>
-        public List<Genre> GetAllGenres()
+        public List<GetGenreResponse> GetAllGenres()
         {
             //create instance of data access layer to music graph store
             DataAccess dal = DataAccess.Instance;
 
             //get related genres from music graph store
-            return dal.GetAllGenres();
+            List<Genre> genres = new List<Genre>();
+            genres = dal.GetAllGenres();
+
+            List<GetGenreResponse> response = new List<GetGenreResponse>();
+            foreach (Genre genre in genres)
+            {
+                response.Add(new GetGenreResponse(genre));
+            }
+
+            return response;
         }
 
         /// <summary>
@@ -98,11 +114,20 @@ namespace MusicGraphExplorerAPI
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public List<Artist> SearchArtistByName(string name)
+        public List<SearchArtistResponse> SearchArtistByName(string name)
         {
             DataAccess dal = DataAccess.Instance;
 
-            return dal.SearchArtistByName(name);
+            List<Artist> artists = new List<Artist>();
+            artists = dal.SearchArtistByName(name);
+
+            List<SearchArtistResponse> response = new List<SearchArtistResponse>();
+            foreach (Artist a in artists)
+            {
+                response.Add(new SearchArtistResponse(a));
+            }
+
+            return response;
         }
 
         /// <summary>
@@ -112,11 +137,28 @@ namespace MusicGraphExplorerAPI
         /// <param name="toSpotifyId">destination artist spotifyId</param>
         /// <param name="pageSize">number of paths to return</param>
         /// <returns>a list of paths. Each path is a list of artist. The relevance of artists within each path is the relevance of the relationship with the previous artist in the list</returns>
-        public List<List<Artist>> GetPathsBetweenArtists(string fromSpotifyId, string toSpotifyId, int pageSize)
+        public List<List<GetRelatedArtistResponse>> GetPathsBetweenArtists(string fromSpotifyId, string toSpotifyId, int pageSize)
         {
             DataAccess dal = DataAccess.Instance;
 
-            return dal.GetPathsBetweenArtists(fromSpotifyId, toSpotifyId, pageSize);
+            List<List<Artist>> paths = new List<List<Artist>>();
+            paths = dal.GetPathsBetweenArtists(fromSpotifyId, toSpotifyId, pageSize);
+
+            List<List<GetRelatedArtistResponse>> response = new List<List<GetRelatedArtistResponse>>();
+
+            foreach (List<Artist> path in paths)
+            {
+                List<GetRelatedArtistResponse> responsepath = new List<GetRelatedArtistResponse>();
+
+                foreach (Artist a in path)
+                {
+                    responsepath.Add(new GetRelatedArtistResponse(a));
+                }
+
+                response.Add(responsepath);
+            }
+
+            return response;
         }
 
     }
