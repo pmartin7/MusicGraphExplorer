@@ -46,7 +46,7 @@ namespace MusicGraphExplorerAPI
 
         [OperationContract]
         [WebGet(UriTemplate = "/genre/{genre}/artists",
-            RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json,
+            RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json, 
             BodyStyle = WebMessageBodyStyle.Bare)]
         GetGenreAndRelatedArtistsResponse GetArtistsForGenre(string genre);
 

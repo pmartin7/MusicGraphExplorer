@@ -8,9 +8,11 @@ using System.Text;
 using MusicGraphStore.DataAccessLayer;
 using MusicGraphStore.GraphDataModel;
 using MusicGraphExplorerAPI.DataContract;
+using System.ServiceModel.Activation;
 
 namespace MusicGraphExplorerAPI
 {
+    [AspNetCompatibilityRequirements(RequirementsMode = AspNetCompatibilityRequirementsMode.Allowed)]
     public class MusicGraphAPI : IMusicGraphAPI
     {
         /// <summary>
