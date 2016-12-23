@@ -3,7 +3,6 @@
   <Role name="MusicGraphExplorerAPI">
     <Instances count="1" />
     <ConfigurationSettings>
-      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=l9portalvhds0m9bx8q694nn;AccountKey=7rvbmfauQGhwiGBz29HbLcSGPN/UF0cAQNB+ZKbTpiErgDwDjPf7/5YFjZhWSZRwIZzSiTFT4x2YFxKu4LZx1w==" />
     </ConfigurationSettings>
   </Role>
 </ServiceConfiguration>

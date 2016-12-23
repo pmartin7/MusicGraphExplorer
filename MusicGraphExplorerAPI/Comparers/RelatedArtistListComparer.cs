@@ -15,8 +15,9 @@ namespace MusicGraphExplorerAPI.Comparers
             //we will ensure that every artist in the path is the same, and the order is the same
             for (int i = 0; i < list1.Count; i++)
             {
-                if ( (list1[i].SpotifyId != list2[i].SpotifyId) 
-                  || (list1[i].Relevance != list2[i].Relevance) )
+                ////TODO: consider whether we want to return paths with same artists but variation in relevance (relevance is directional)
+                if ( (list1[i].SpotifyId != list2[i].SpotifyId) )
+                  //|| (list1[i].Relevance != list2[i].Relevance) )
                 {
                     return false;
                 }
