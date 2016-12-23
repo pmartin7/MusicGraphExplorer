@@ -139,14 +139,14 @@ namespace MusicGraphExplorerAPI
         /// <param name="toSpotifyId">destination artist spotifyId</param>
         /// <param name="pageSize">number of paths to return</param>
         /// <returns>a list of paths. Each path is a list of artist. The relevance of artists within each path is the relevance of the relationship with the previous artist in the list</returns>
-        public List<List<GetRelatedArtistResponse>> GetPathsBetweenArtists(string fromSpotifyId, string toSpotifyId, int pageSize)
+        public HashSet<List<GetRelatedArtistResponse>> GetPathsBetweenArtists(string fromSpotifyId, string toSpotifyId, int pageSize)
         {
             DataAccess dal = DataAccess.Instance;
 
             List<List<Artist>> paths = new List<List<Artist>>();
             paths = dal.GetPathsBetweenArtists(fromSpotifyId, toSpotifyId, pageSize);
 
-            List<List<GetRelatedArtistResponse>> response = new List<List<GetRelatedArtistResponse>>();
+            HashSet<List<GetRelatedArtistResponse>> response = new HashSet<List<GetRelatedArtistResponse>>(new Comparers.RelatedArtistListComparer());
 
             foreach (List<Artist> path in paths)
             {

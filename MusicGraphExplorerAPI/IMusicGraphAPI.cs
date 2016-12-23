@@ -36,7 +36,7 @@ namespace MusicGraphExplorerAPI
         [WebGet(UriTemplate = "/artist/path?from={fromSpotifyId}&to={toSpotifyId}&size={pageSize}",
             RequestFormat = WebMessageFormat.Json, ResponseFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Bare)]
-        List<List<GetRelatedArtistResponse>> GetPathsBetweenArtists(string fromSpotifyId, string toSpotifyId, int pageSize);
+        HashSet<List<GetRelatedArtistResponse>> GetPathsBetweenArtists(string fromSpotifyId, string toSpotifyId, int pageSize);
 
         [OperationContract]
         [WebGet(UriTemplate = "/genre/{genre}/related",

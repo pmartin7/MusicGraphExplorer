@@ -99,6 +99,7 @@
     <Content Include="MusicGraphAPI.svc" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Comparers\RelatedArtistListComparer.cs" />
     <Compile Include="DataContract\GetArtistAndRelatedArtistsResponse.cs" />
     <Compile Include="DataContract\GetGenreAndRelatedArtistsResponse.cs" />
     <Compile Include="DataContract\GetRelatedArtistResponse.cs" />
