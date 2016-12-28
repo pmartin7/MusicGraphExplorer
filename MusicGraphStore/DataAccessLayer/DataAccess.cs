@@ -390,7 +390,8 @@ namespace MusicGraphStore.DataAccessLayer
                             Artist artist = Helpers.DeserializeNode(node, new Artist());
 
                             //not starting node --- provide the relevance of the relationship to the previous Artist
-                            if (k>0)
+                            //note that it can be that the relevance is not computed yet
+                            if ( (k>0) && (path.Relationships[k - 1].Properties.ContainsKey("Relevance")) )
                             {
                                 artist.Relevance = float.Parse(path.Relationships[k-1]["Relevance"].As<string>());
                             }

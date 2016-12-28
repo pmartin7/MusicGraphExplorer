@@ -118,6 +118,12 @@ namespace MusicGraphExplorerAPI
         /// <returns></returns>
         public List<SearchArtistResponse> SearchArtistByName(string name)
         {
+            //if input is null, return empty list
+            if (null == name)
+            {
+                return new List<SearchArtistResponse>();
+            }
+
             DataAccess dal = DataAccess.Instance;
 
             List<Artist> artists = new List<Artist>();
